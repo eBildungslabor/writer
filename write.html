@@ -1,0 +1,201 @@
+<html lang="de">
+
+<body>
+    <style>
+        body,
+        textarea {
+            background-color: rgb(255, 215, 162);
+        }
+
+        textarea {
+            scrollbar-width: none;
+
+            /* blocksatz */
+            /*             resize: none;
+ */
+            text-align: justify;
+            white-space: pre-line;
+            /*             -moz-text-align-last: left;
+            text-align-last: left; */
+
+
+            display: block;
+            width: 700px;
+            height: 50%;
+            margin: auto;
+            padding-top: 50px;
+            outline: none;
+            -webkit-appearance: none;
+            border: 0px solid black;
+            border-radius: 2px;
+            resize: none;
+
+            font-size: 2em;
+            font-weight: normal;
+            font-family: 'Times New Roman', Times, serif;
+
+            overflow-wrap: break-word;
+
+            /* Nur in Firefox */
+            -moz-hyphens: auto;
+            -o-hyphens: auto;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+            hyphens: auto;
+
+            /* word-wrap: break-word; */
+
+            /* -ms-word-break: break-all;
+            word-break: break-all; */
+
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        #wiki {
+            height: 100%;
+            width: 400px;
+            /* background: grey; */
+            overflow: auto;
+            font-size: 1.5em;
+        }
+
+        .textbox {
+            display: contents;
+        }
+
+        .flex {
+            display: flex;
+        }
+    </style>
+
+
+    <div class="flex">
+
+        <div id="wiki"></div>
+        <div class="textbox">
+            <textarea>heut morgen abendluft Abendluft Heutzutage Essenkochen fuchsteufelswild, modern und zugenäht
+            </textarea>
+        </div>
+
+
+    </div>
+
+
+
+
+    <script type="module">
+
+
+        import getWiki from './wiktionary.js'
+
+
+
+
+
+        let word = ""
+        function wikiLoad(key) {
+            console.log(key)
+            if (key === " " || key === "Backspace") {
+                word = ""
+            } else if (key.length === 1) {
+                word += key
+                load(word)
+            }
+
+            console.log("word ", word)
+
+            function load(word) {
+                let array = getWiki(word)
+                array.then(a => {
+                    a = a.join("<br>")
+                    wiki.innerHTML = a;
+
+                    //console.dir(a)
+                })
+            }
+
+
+        }
+        getWiki("Abend").then(e => console.dir(e))
+
+
+
+
+
+
+
+
+        setInterval(() => saveTextAsFile(), 1000 * 60 * 3)
+
+        function yyyymmdd() {
+            var x = new Date();
+            var y = x.getFullYear().toString();
+            var m = (x.getMonth() + 1).toString();
+            var d = x.getDate().toString();
+            (d.length == 1) && (d = '0' + d);
+            (m.length == 1) && (m = '0' + m);
+            var yyyymmdd = y + "-" + m + "-" + d;
+            return yyyymmdd;
+        }
+        var textToWrite = "";
+        document.addEventListener("keyup", e => {
+            textToWrite = document.querySelector("textarea").value;
+        })
+
+
+        function saveTextAsFile() {
+            var textFileAsBlob = new Blob([textToWrite], { type: 'text/plain' });
+
+            var fileNameToSaveAs = "text-" + yyyymmdd() + ".tex";
+
+
+            var downloadLink = document.createElement("a");
+            downloadLink.download = fileNameToSaveAs;
+            downloadLink.innerHTML = "Download File";
+            if (window.webkitURL != null) {
+                // Chrome allows the link to be clicked without actually adding it to the DOM.
+                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+            } else {
+                // Firefox requires the link to be added to the DOM before it can be clicked.
+                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+                downloadLink.onclick = destroyClickedElement;
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+            }
+
+            downloadLink.click();
+        }
+
+        document.querySelector("textarea").focus()
+        document.addEventListener("click", e => {
+            //document.querySelector("textarea").focus()
+        })
+        document.addEventListener("dblclick", e => {
+            saveTextAsFile();
+        })
+
+        let counter = 0;
+        document.addEventListener("keydown", e => {
+            //console.log(e.key, e.ctrlKey)
+            if (e.key === " " && e.ctrlKey) counter++;
+            else counter = 0;
+
+            if (counter === 2) saveTextAsFile();
+            wikiLoad(e.key)
+        })
+
+        function destroyClickedElement(event) {
+            // remove the link from the DOM
+            document.body.removeChild(event.target);
+        }
+
+    </script>
+</body>
+
+
+
+
+</html>
