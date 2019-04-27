@@ -7,7 +7,7 @@ async function get(word) {
     if (word.length === 0) {
         return [];
     }
-    var url = new URL("http://de.wiktionary.org/w/api.php"),
+    var url = new URL("https://de.wiktionary.org/w/api.php"),
         params = {
             format: "json",
             origin: "*",
